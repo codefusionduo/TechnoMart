@@ -1,0 +1,6 @@
+{
+  "name": "Technomart",
+  "description": "A full-stack e-commerce application for Samsung phones and earbuds.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
