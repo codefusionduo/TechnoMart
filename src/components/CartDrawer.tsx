@@ -67,7 +67,7 @@ export function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantity, onRem
                       </button>
                     </div>
                     <p className="text-blue-400 font-bold text-sm mt-1">
-                      ${item.product.price.toFixed(2)}
+                      ₹{item.product.price.toLocaleString('en-IN')}
                     </p>
                     <div className="mt-auto flex items-center gap-3">
                       <div className="flex items-center bg-black/50 rounded-lg border border-white/10 overflow-hidden">
@@ -100,7 +100,7 @@ export function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantity, onRem
           <div className="p-6 border-t border-white/10 bg-[#0A0A0A]">
             <div className="flex items-center justify-between mb-4">
               <span className="text-slate-400 font-medium">Subtotal</span>
-              <span className="text-xl font-bold text-white">${total.toFixed(2)}</span>
+              <span className="text-xl font-bold text-white">₹{total.toLocaleString('en-IN')}</span>
             </div>
             <p className="text-xs text-slate-500 mb-6">Shipping and taxes calculated at checkout.</p>
             <button 

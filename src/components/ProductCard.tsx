@@ -51,7 +51,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </p>
         <div className="mt-auto flex items-center justify-between">
           <span className="text-blue-400 font-bold text-lg">
-            ${product.price.toFixed(2)}
+            ₹{product.price.toLocaleString('en-IN')}
           </span>
           <div className="flex gap-2">
             <motion.button 

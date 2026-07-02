@@ -55,45 +55,17 @@ app.post('/api/auth/register', async (req, res) => {
     if (existingUser) return res.status(400).json({ error: 'User already exists' });
     
     const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationToken = uuidv4();
-    const user = new User({ name, email, password: hashedPassword, verificationToken });
+    const user = new User({ name, email, password: hashedPassword, isVerified: true });
     await user.save();
     
-    if (transporter) {
-      const verifyUrl = `${req.protocol}://${req.get('host')}/?token=${verificationToken}`;
-      const info = await transporter.sendMail({
-        from: '"Technomart" <noreply@technomart.com>',
-        to: email,
-        subject: "Verify your Email",
-        text: `Please click the following link to verify your email: ${verifyUrl}`,
-        html: `<p>Please click the following link to verify your email: <a href="${verifyUrl}">${verifyUrl}</a></p>`,
-      });
-      console.log("Verification email preview URL: %s", nodemailer.getTestMessageUrl(info));
-    }
-    
-    res.json({ message: 'Registration successful! Please check your email to verify your account.' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '1d' });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-app.post('/api/auth/verify', async (req, res) => {
-  try {
-    const { token } = req.body;
-    if (!token) return res.status(400).json({ error: 'Token is required' });
 
-    const user = await User.findOne({ verificationToken: token });
-    if (!user) return res.status(400).json({ error: 'Invalid or expired verification token.' });
-
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    await user.save();
-
-    res.json({ message: 'Email verified successfully! You can now log in.' });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
 
 app.post('/api/auth/login', async (req, res) => {
   try {
@@ -104,10 +76,6 @@ app.post('/api/auth/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     
-    if (!user.isVerified) {
-      return res.status(400).json({ error: 'Please verify your email before logging in.' });
-    }
-
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '1d' });
     res.json({ token, user: { id: user._id, name: user.name, email } });
   } catch (error) {
@@ -133,77 +101,77 @@ app.post('/api/products/seed', async (req, res) => {
       {
         name: 'Samsung Galaxy S24 Ultra',
         description: 'Titanium exterior, 200MP camera, Snapdragon 8 Gen 3.',
-        price: 1299.99,
+        price: 129999,
         image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&q=80&w=400',
         category: 'phone'
       },
       {
         name: 'Samsung Galaxy Z Fold 5',
         description: 'Unfold your world with the most advanced foldable screen.',
-        price: 1799.99,
+        price: 154999,
         image: '/src/assets/images/regenerated_image_1782915266209.png',
         category: 'phone'
       },
       {
         name: 'Samsung Galaxy Buds2 Pro',
         description: 'Ultimate Hi-Fi sound in your ear. Active noise cancellation.',
-        price: 229.99,
+        price: 17999,
         image: 'https://images.unsplash.com/photo-1605464315542-bda3e2f4e605?auto=format&fit=crop&q=80&w=400',
         category: 'earbud'
       },
       {
         name: 'Samsung Galaxy A54 5G',
         description: 'Awesome screen, awesome camera, long lasting battery life.',
-        price: 449.99,
+        price: 38999,
         image: '/src/assets/images/regenerated_image_1782915473517.png',
         category: 'phone'
       },
        {
         name: 'Samsung Galaxy Buds FE',
         description: 'Your everyday audio companion. Ergonomic comfort and rich sound.',
-        price: 99.99,
+        price: 7999,
         image: '/src/assets/images/regenerated_image_1782915277060.png',
         category: 'earbud'
       },
       {
         name: 'Samsung Galaxy Tab S9 Ultra',
         description: 'Epic display. Epic performance. The largest Dynamic AMOLED 2X display.',
-        price: 1199.99,
+        price: 119999,
         image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&q=80&w=400',
         category: 'tablet'
       },
       {
         name: 'Samsung Galaxy Tab S9+',
         description: 'Take your inspiration further with the Galaxy Tab S9+.',
-        price: 999.99,
+        price: 90999,
         image: 'https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?auto=format&fit=crop&q=80&w=400',
         category: 'tablet'
       },
       {
         name: 'Samsung Galaxy Tab A9+',
         description: 'The Galaxy Tab A9+ brings you a premium tablet experience at an incredible value.',
-        price: 219.99,
+        price: 20999,
         image: 'https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&q=80&w=400',
         category: 'tablet'
       },
       {
         name: 'Samsung Galaxy Watch 6 Classic',
         description: 'Keep your goals on track and look good doing it with the return of the iconic rotating bezel.',
-        price: 399.99,
+        price: 36999,
         image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&q=80&w=400',
         category: 'accessory'
       },
       {
         name: 'Samsung 45W Power Adapter',
         description: 'Super Fast Charging 2.0 to keep you connected.',
-        price: 49.99,
+        price: 3499,
         image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&q=80&w=400',
         category: 'accessory'
       },
       {
         name: 'Samsung Galaxy SmartTag2',
         description: 'Keep track of the things that matter most.',
-        price: 29.99,
+        price: 2499,
         image: '/src/assets/images/regenerated_image_1782915287017.webp',
         category: 'accessory'
       }
@@ -284,77 +252,77 @@ async function startServer() {
         {
           name: 'Samsung Galaxy S24 Ultra',
           description: 'Titanium exterior, 200MP camera, Snapdragon 8 Gen 3.',
-          price: 1299.99,
+          price: 129999,
           image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&q=80&w=400',
           category: 'phone'
         },
         {
           name: 'Samsung Galaxy Z Fold 5',
           description: 'Unfold your world with the most advanced foldable screen.',
-          price: 1799.99,
+          price: 154999,
           image: '/src/assets/images/regenerated_image_1782915266209.png',
           category: 'phone'
         },
         {
           name: 'Samsung Galaxy Buds2 Pro',
           description: 'Ultimate Hi-Fi sound in your ear. Active noise cancellation.',
-          price: 229.99,
+          price: 17999,
           image: 'https://images.unsplash.com/photo-1605464315542-bda3e2f4e605?auto=format&fit=crop&q=80&w=400',
           category: 'earbud'
         },
         {
           name: 'Samsung Galaxy A54 5G',
           description: 'Awesome screen, awesome camera, long lasting battery life.',
-          price: 449.99,
+          price: 38999,
           image: '/src/assets/images/regenerated_image_1782915473517.png',
           category: 'phone'
         },
          {
           name: 'Samsung Galaxy Buds FE',
           description: 'Your everyday audio companion. Ergonomic comfort and rich sound.',
-          price: 99.99,
+          price: 7999,
           image: '/src/assets/images/regenerated_image_1782915277060.png',
           category: 'earbud'
         },
         {
           name: 'Samsung Galaxy Tab S9 Ultra',
           description: 'Epic display. Epic performance. The largest Dynamic AMOLED 2X display.',
-          price: 1199.99,
+          price: 119999,
           image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&q=80&w=400',
           category: 'tablet'
         },
         {
           name: 'Samsung Galaxy Tab S9+',
           description: 'Take your inspiration further with the Galaxy Tab S9+.',
-          price: 999.99,
+          price: 90999,
           image: 'https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?auto=format&fit=crop&q=80&w=400',
           category: 'tablet'
         },
         {
           name: 'Samsung Galaxy Tab A9+',
           description: 'The Galaxy Tab A9+ brings you a premium tablet experience at an incredible value.',
-          price: 219.99,
+          price: 20999,
           image: 'https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&q=80&w=400',
           category: 'tablet'
         },
         {
           name: 'Samsung Galaxy Watch 6 Classic',
           description: 'Keep your goals on track and look good doing it with the return of the iconic rotating bezel.',
-          price: 399.99,
+          price: 36999,
           image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&q=80&w=400',
           category: 'accessory'
         },
         {
           name: 'Samsung 45W Power Adapter',
           description: 'Super Fast Charging 2.0 to keep you connected.',
-          price: 49.99,
+          price: 3499,
           image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&q=80&w=400',
           category: 'accessory'
         },
         {
           name: 'Samsung Galaxy SmartTag2',
           description: 'Keep track of the things that matter most.',
-          price: 29.99,
+          price: 2499,
           image: '/src/assets/images/regenerated_image_1782915287017.webp',
           category: 'accessory'
         }

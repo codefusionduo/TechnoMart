@@ -62,35 +62,8 @@ export default function App() {
       }
     }
     
-    // Check for verification token in URL
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (token) {
-      verifyEmail(token);
-    }
-    
     fetchProducts();
   }, []);
-
-  const verifyEmail = async (token: string) => {
-    try {
-      const res = await fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert('Email verified successfully! You can now log in.');
-        setIsAuthModalOpen(true);
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } else {
-        alert(data.error || 'Verification failed');
-      }
-    } catch (error) {
-      alert('Verification failed');
-    }
-  };
 
   const fetchProducts = async () => {
     setLoading(true);

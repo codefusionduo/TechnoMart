@@ -211,7 +211,7 @@ export function AdminPanel({ token, onClose, products, setProducts }: AdminPanel
                     <img src={product.image} alt={product.name} className="w-20 h-20 object-cover rounded-lg bg-slate-800" />
                     <div>
                       <h3 className="font-bold text-white text-sm line-clamp-2">{product.name}</h3>
-                      <p className="text-blue-400 font-bold mt-1">${product.price.toFixed(2)}</p>
+                      <p className="text-blue-400 font-bold mt-1">₹{product.price.toLocaleString('en-IN')}</p>
                     </div>
                   </div>
                   <div className="mt-auto flex justify-end gap-2 pt-4 border-t border-white/5">

@@ -12,7 +12,6 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -41,14 +40,8 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         throw new Error(data.error || 'Authentication failed');
       }
 
-      if (!isLogin) {
-        setSuccessMsg(data.message || 'Registration successful! Please check your email.');
-        setIsLogin(true);
-        setPassword('');
-      } else {
-        onSuccess(data);
-        onClose();
-      }
+      onSuccess(data);
+      onClose();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -79,12 +72,6 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           {error && (
             <div className="mb-6 p-4 bg-red-900/20 text-red-400 text-sm rounded-xl border border-red-900/50">
               {error}
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="mb-6 p-4 bg-green-900/20 text-green-400 text-sm rounded-xl border border-green-900/50">
-              {successMsg}
             </div>
           )}
 
@@ -159,7 +146,6 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
-                setSuccessMsg('');
               }}
               className="text-blue-400 font-bold hover:text-blue-300 transition-colors"
             >
