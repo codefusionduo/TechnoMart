@@ -16,7 +16,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -8, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3)" }}
       className="bg-[#161616] p-5 rounded-2xl border border-white/5 flex flex-col group hover:border-white/10 transition-colors"
     >
       <div className="w-full aspect-square bg-slate-800/50 rounded-xl mb-4 overflow-hidden relative">
@@ -51,7 +51,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </p>
         <div className="mt-auto flex items-center justify-between">
           <span className="text-blue-400 font-bold text-lg">
-            ₹{product.price.toLocaleString('en-IN')}
+            Rs. {product.price.toLocaleString('en-IN')}
           </span>
           <div className="flex gap-2">
             <motion.button 

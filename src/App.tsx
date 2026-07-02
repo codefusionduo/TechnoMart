@@ -10,6 +10,7 @@ import { AuthModal } from './components/AuthModal';
 import { CartDrawer } from './components/CartDrawer';
 import { AdminPanel } from './components/AdminPanel';
 import { PrivacyPolicy, TermsOfService, Support } from './components/LegalPages';
+import { CategoryFilter } from './components/CategoryFilter';
 import { Product, User, AuthResponse, CartItem } from './types';
 import { AlertCircle, ServerCrash, RefreshCw, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -30,6 +31,8 @@ export default function App() {
   const [isAdminView, setIsAdminView] = useState(false);
   const [isPaymentView, setIsPaymentView] = useState(false);
   const [activePage, setActivePage] = useState<'home' | 'privacy' | 'terms' | 'support'>('home');
+  const [sortOrder, setSortOrder] = useState<'default' | 'low-to-high' | 'high-to-low'>('default');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   const handleCheckout = () => {
     if (!user) {
@@ -137,10 +140,20 @@ export default function App() {
 
   const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean))) as string[];
+
   const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    (product.category && product.category.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+    (selectedCategory === 'All' || product.category === selectedCategory) &&
+    (product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (product.category && product.category.toLowerCase().includes(searchQuery.toLowerCase())))
+  ).sort((a, b) => {
+    if (sortOrder === 'low-to-high') {
+      return a.price - b.price;
+    } else if (sortOrder === 'high-to-low') {
+      return b.price - a.price;
+    }
+    return 0; // 'default'
+  });
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-slate-100 font-sans selection:bg-blue-900/50 flex flex-col overflow-x-hidden relative">
@@ -274,19 +287,41 @@ export default function App() {
         {/* Products Section */}
         <section id="products" className="px-8 py-16 lg:px-12 bg-[#0D0D0D] border-t border-white/5">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-end mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
               <h2 className="text-sm uppercase tracking-widest font-bold text-slate-500">Latest Ecosystem</h2>
               
-              {!loading && !error && products.length === 0 && (
-                <button 
-                  onClick={handleSeed}
-                  disabled={isSeeding}
-                  className="text-xs text-blue-500 hover:underline flex items-center gap-2 disabled:opacity-50"
-                >
-                  <RefreshCw size={14} className={isSeeding ? "animate-spin" : ""} />
-                  Seed Demo Data
-                </button>
-              )}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <CategoryFilter 
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={setSelectedCategory}
+                />
+
+                <div className="flex items-center gap-2">
+                  <label htmlFor="price-filter" className="text-sm text-slate-400">Sort by:</label>
+                  <select 
+                    id="price-filter"
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value as 'default' | 'low-to-high' | 'high-to-low')}
+                    className="bg-black/50 border border-white/10 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none"
+                  >
+                    <option value="default">Default</option>
+                    <option value="low-to-high">Price: Low to High</option>
+                    <option value="high-to-low">Price: High to Low</option>
+                  </select>
+                </div>
+
+                {!loading && !error && products.length === 0 && (
+                  <button 
+                    onClick={handleSeed}
+                    disabled={isSeeding}
+                    className="text-xs text-blue-500 hover:underline flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <RefreshCw size={14} className={isSeeding ? "animate-spin" : ""} />
+                    Seed Demo Data
+                  </button>
+                )}
+              </div>
             </div>
 
             {loading ? (
